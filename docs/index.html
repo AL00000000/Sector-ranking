@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>東証 業種別騰落ランキング</title>
+<style>
+:root{--bg:#0b1020;--panel:#111a2e;--panel2:#0d1424;--border:#22314f;--text:#e5edf8;--muted:#8795ae;--accent:#40c6d0;--up:#ff6575;--down:#58a6ff;--new:#ffd166}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:"Segoe UI","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;min-height:100vh}.wrap{max-width:980px;margin:0 auto;padding:24px 16px 64px}header.site{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px 18px;padding:8px 4px 20px}h1{font-size:1.45rem}.dot{color:var(--accent)}.sub{color:var(--muted);font-size:.86rem}.srcbtn{margin-left:auto;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:7px 14px;font-size:.82rem}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}label{color:var(--muted);font-size:.82rem;margin-right:6px}select,input{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.9rem}input{width:220px}button.refresh{background:linear-gradient(135deg,#1d8f98,#40c6d0);color:#03141b;font-weight:700;border:0;border-radius:8px;padding:9px 16px;cursor:pointer}button.refresh:disabled{opacity:.55;cursor:wait}.stat{color:var(--muted);font-size:.82rem}.stat b{color:var(--text)}.banner{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--panel2);padding:9px 14px;margin-bottom:10px;font-size:.84rem;color:var(--muted)}.banner b{color:var(--text)}.banner.is-live{border-color:#1d8f98}.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:7px;box-shadow:0 0 6px var(--accent)}.err{color:var(--up)}.hint{color:var(--muted);font-size:.78rem;line-height:1.7;padding:0 4px 10px}.tablecard{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:78vh}table{border-collapse:collapse;width:100%;font-size:.92rem;white-space:nowrap}thead th{position:sticky;top:0;background:#16223f;color:var(--muted);font-weight:600;font-size:.8rem;padding:10px;text-align:right;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}thead th.tl{text-align:left}tbody td{padding:8px 10px;text-align:right;border-bottom:1px solid #17223b;font-variant-numeric:tabular-nums}tbody td.tl{text-align:left}tbody tr:hover{background:#16223f66}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}.new{color:var(--new);font-weight:700}.industry{font-weight:600}.loading{padding:42px;text-align:center;color:var(--muted)}footer{margin-top:18px;color:var(--muted);font-size:.76rem;line-height:1.7;padding:0 4px}footer a{color:var(--accent)}@media(max-width:720px){input{width:100%}table{font-size:.75rem}thead th,tbody td{padding:7px 5px}.srcbtn{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <h1>東証 業種別騰落ランキング<span class="dot">.</span></h1>
+  <span class="sub">株探 / 前日比率降順 / 平日15:50取得</span>
+  <a class="srcbtn" href="https://github.com/AL00000000/Sector-ranking/archive/refs/heads/main.zip">ソースコード</a>
+</header>
+<div class="toolbar">
+  <button class="refresh" id="refreshBtn">最新データを取得</button>
+  <span><label>データ群</label><select id="viewSel"><option value="default">全業種</option><option value="up">上昇業種のみ</option><option value="down">下落業種のみ</option></select></span>
+  <span><label>日付</label><select id="dateSel"></select></span>
+  <input id="q" type="search" placeholder="業種名で絞り込み">
+  <span class="stat" id="stat"></span>
+</div>
+<div class="banner" id="banner">読み込み中...</div>
+<div class="hint">列見出しクリックで並び替えできます。「変動」は前回保存日からの順位変動、「前日比率差」は前回保存日との差です。ライブ取得は表示のみで保存しません。</div>
+<div class="tablecard"><table><thead><tr id="headRow"></tr></thead><tbody id="body"><tr><td class="loading" colspan="6">読み込み中...</td></tr></tbody></table></div>
+<footer>データ取得元: <a href="https://kabutan.jp/warning/?mode=9_1&market=0&capitalization=-1&stc=zenhiritsu&stm=1&col=zenhiritsu" target="_blank" rel="noopener">株探 東証【業種別】騰落ランキング</a> / 本サイトのデータの正確性は保証されません。</footer>
+</div>
+<script>
+"use strict";
+const COLS=[
+ {key:"rank",label:"順位",num:s=>s.rank},
+ {key:"move",label:"変動",num:s=>s.is_new?Infinity:(s.move_num??-Infinity),color:true},
+ {key:"prev_rank",label:"前日順位",num:s=>s.prev_rank===""?Infinity:+s.prev_rank},
+ {key:"industry",label:"業種名",left:true,cls:"industry tl"},
+ {key:"change_pct",label:"前日比率",num:s=>pnum(s.change_pct),color:true},
+ {key:"change_pct_diff",label:"前日比率差",num:s=>s.change_pct_diff_num??-Infinity,color:true}
+];
+const VIEWS={default:{filter:null},up:{filter:s=>pnum(s.change_pct)>0},down:{filter:s=>pnum(s.change_pct)<0}};
+let view="default",all=[],allDates=[],sortKey="rank",sortAsc=true;
+const DATA_NOTES={};
+const TARGET_URL="https://kabutan.jp/warning/?mode=9_1&market=0&capitalization=-1&stc=zenhiritsu&stm=1&col=zenhiritsu";
+const LIVE_PAGES=3;
+const PROXY=u=>"https://corsproxy.io/?url="+encodeURIComponent(u);
+const C=g=>`<td[^>]*>\\s*(?:<span[^>]*>)?(?<${g}>[^<]*)(?:<\\/span>)?\\s*%?\\s*<\\/td>`;
+const ICON=`(?:(?!<\\/td>)[\\s\\S])*<\\/td>`;
+const ROW_RE=new RegExp(`<tr>\\s*<td class="tac"><a href="\\/stock\\/\\?code=(?<code>[0-9A-Z]+)">[0-9A-Z]+<\\/a><\\/td>\\s*<th scope="row" class="tal"><a href="\\/themes\\/\\?industry=[^"]+">(?<industry>[^<]+)<\\/a><\\/th>\\s*<td>(?<issue_count>[^<]*)<\\/td>\\s*<td class="chart_icon">${ICON}\\s*`+C("price")+`\\s*<td[^>]*>\\s*<\\/td>\\s*`+C("change")+`\\s*`+C("change_pct")+`\\s*`+C("per")+`\\s*`+C("pbr")+`\\s*`+C("yield_pct"),"g");
+const AS_OF_RE=/(\d{4})年(\d{2})月(\d{2})日<\/li>\s*<li>(\d{2}:\d{2})現在/;
+function pnum(v){if(v==null||v===""||v==="－")return-Infinity;const n=parseFloat(String(v).replace(/,/g,"").replace("+",""));return isNaN(n)?-Infinity:n}
+function cls(v){const s=String(v);if(s.startsWith("+")||s.startsWith("↑"))return"up";if(s.startsWith("-")||s.startsWith("↓"))return"down";if(s==="→")return"flat";if(s==="NEW")return"new";return""}
+function activeCols(){return COLS}
+function buildHead(){const tr=document.getElementById("headRow");tr.innerHTML="";for(const c of activeCols()){const th=document.createElement("th");th.textContent=c.label;if(c.left)th.classList.add("tl");if(c.key===sortKey)th.textContent+=sortAsc?" ▲":" ▼";th.onclick=()=>{if(sortKey===c.key)sortAsc=!sortAsc;else{sortKey=c.key;sortAsc=c.num?c.key==="rank":true}render()};tr.appendChild(th)}}
+function render(){buildHead();const q=document.getElementById("q").value.trim().toLowerCase();const vf=VIEWS[view].filter;let rows=all.filter(s=>(!q||s.industry.toLowerCase().includes(q))&&(!vf||vf(s)));const col=COLS.find(c=>c.key===sortKey);rows.sort((a,b)=>{if(sortKey==="move"){if(a.is_new!==b.is_new)return a.is_new?1:-1;if(a.is_new)return a.rank-b.rank}let r=col.num?col.num(a)-col.num(b):String(a[col.key]).localeCompare(String(b[col.key]),"ja");if(r===0)r=a.rank-b.rank;return sortAsc?r:-r});const tb=document.getElementById("body");tb.innerHTML="";const frag=document.createDocumentFragment();for(const s of rows){const tr=document.createElement("tr");for(const c of activeCols()){const td=document.createElement("td");const v=s[c.key];td.className=c.cls||(c.left?"tl":c.color?cls(v):"");td.textContent=v===undefined||v===null||v===""?"-":v;tr.appendChild(td)}frag.appendChild(tr)}tb.appendChild(frag);document.getElementById("stat").innerHTML="表示 <b>"+rows.length+"</b> / "+all.length+" 業種"}
+function setBanner(html,live){const b=document.getElementById("banner");b.innerHTML=html;b.classList.toggle("is-live",!!live)}
+async function loadDate(d){const res=await fetch("data/"+d+".json",{cache:"no-cache"});const data=await res.json();all=data.rows;setBanner("保存データ: <b>"+(data.as_of?data.as_of+" 時点":d)+"</b> / 比較対象: <b>"+(data.prev_date||"なし(初回)")+"</b>",false);render()}
+function parseLive(html){const body=html.split('<div class="warning_contents">').slice(1).join('<div class="warning_contents">').split("</tbody>")[0];const rows=[];ROW_RE.lastIndex=0;let m;while((m=ROW_RE.exec(body))!==null){rows.push({industry:m.groups.industry.trim(),change_pct:m.groups.change_pct.trim()})}return rows}
+async function refreshLive(){const btn=document.getElementById("refreshBtn");btn.disabled=true;const orig=btn.textContent;try{const cb=Date.now();btn.textContent="取得中... 0/"+LIVE_PAGES;const htmls=[];for(let p=1;p<=LIVE_PAGES;p++){const res=await fetch(PROXY(TARGET_URL+"&page="+p+"&_cb="+cb),{cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);htmls.push(await res.text());btn.textContent="取得中... "+p+"/"+LIVE_PAGES}const html=htmls[0];let rows=htmls.flatMap(parseLive);const seen=new Set();rows=rows.filter(s=>!seen.has(s.industry)&&seen.add(s.industry));if(rows.length!==33)throw new Error("33業種を抽出できませんでした: "+rows.length);rows.forEach((s,i)=>s.rank=i+1);let dataDate=null,asOf=null;const am=html.match(AS_OF_RE);if(am){dataDate=am[1]+"-"+am[2]+"-"+am[3];asOf=dataDate+" "+am[4]}let baseDate=allDates.find(d=>!dataDate||d<dataDate)||null,base={};if(baseDate){const br=await fetch("data/"+baseDate+".json",{cache:"no-cache"});const bd=await br.json();base=Object.fromEntries(bd.rows.map(s=>[s.industry,{rank:s.rank,change_pct:s.change_pct}]))}for(const s of rows){const prev=base[s.industry];if(prev){const diff=prev.rank-s.rank;s.move=diff>0?"↑"+diff:diff<0?"↓"+(-diff):"→";s.prev_rank=prev.rank;s.move_num=diff;s.is_new=false;const delta=pnum(s.change_pct)-pnum(prev.change_pct);s.change_pct_diff_num=Math.round(delta*100)/100;s.change_pct_diff=delta?delta.toFixed(2).replace(/^/,delta>0?"+":"")+"%":"0.00%"}else{s.move=baseDate?"NEW":"";s.prev_rank="";s.move_num=null;s.is_new=!!baseDate;s.change_pct_diff_num=null;s.change_pct_diff=""}}all=rows;setBanner('<span class="live-dot"></span>ライブデータ: <b>'+(asOf?asOf+" 時点":"時刻不明")+'</b>(保存されません) / 比較対象: <b>'+(baseDate||"なし")+"</b>",true);render()}catch(e){setBanner('<span class="err">最新データの取得に失敗しました: '+e+"</span>",false)}finally{btn.disabled=false;btn.textContent=orig}}
+async function init(){const res=await fetch("data/index.json",{cache:"no-cache"});const idx=await res.json();allDates=idx.dates;const sel=document.getElementById("dateSel");sel.innerHTML=allDates.map(d=>'<option value="'+d+'">'+d+"</option>").join("");sel.onchange=()=>loadDate(sel.value);document.getElementById("q").oninput=render;document.getElementById("refreshBtn").onclick=refreshLive;document.getElementById("viewSel").onchange=e=>{view=e.target.value;render()};if(allDates.length)await loadDate(allDates[0]);else document.getElementById("body").innerHTML='<tr><td class="loading" colspan="6">データがありません</td></tr>'}
+init().catch(e=>{document.getElementById("body").innerHTML='<tr><td class="loading" colspan="6">読み込みエラー: '+e+"</td></tr>"});
+</script>
+</body>
+</html>
+
+
+
