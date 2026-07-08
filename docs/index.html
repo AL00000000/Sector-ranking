@@ -23,8 +23,8 @@
   <span class="stat" id="stat"></span>
 </div>
 <div class="banner" id="banner">読み込み中...</div>
-<div class="hint">列見出しクリックで並び替えできます。「変動」は前回保存日からの順位変動、「前日比率差」は前回保存日との差です。ライブ取得は表示のみで保存しません。</div>
-<div class="tablecard"><table><thead><tr id="headRow"></tr></thead><tbody id="body"><tr><td class="loading" colspan="6">読み込み中...</td></tr></tbody></table></div>
+<div class="hint">列見出しクリックで並び替えできます。「変動」は前回保存日からの順位変動、「前日比率差」は前回保存日との差です。「連騰日数」は順位・前日比率それぞれ何日連続で改善しているか(2つは独立して列見出しクリックでソート可能)。ライブ取得は表示のみで保存しません(連騰日数は保存データのみで算出され、ライブ取得時は表示されません)。</div>
+<div class="tablecard"><table><thead><tr id="headRow"></tr></thead><tbody id="body"><tr><td class="loading" colspan="8">読み込み中...</td></tr></tbody></table></div>
 <footer>データ取得元: <a href="https://kabutan.jp/warning/?mode=9_1&market=0&capitalization=-1&stc=zenhiritsu&stm=1&col=zenhiritsu" target="_blank" rel="noopener">株探 東証【業種別】騰落ランキング</a> / 本サイトのデータの正確性は保証されません。</footer>
 </div>
 <script>
@@ -32,10 +32,12 @@
 const COLS=[
  {key:"rank",label:"順位",num:s=>s.rank},
  {key:"move",label:"変動",num:s=>s.is_new?Infinity:(s.move_num??-Infinity),color:true},
+ {key:"move_streak",label:"順位連騰日数",num:s=>s.move_streak??-Infinity},
  {key:"prev_rank",label:"前日順位",num:s=>s.prev_rank===""?Infinity:+s.prev_rank},
  {key:"industry",label:"業種名",left:true,cls:"industry tl"},
  {key:"change_pct",label:"前日比率",num:s=>pnum(s.change_pct),color:true},
- {key:"change_pct_diff",label:"前日比率差",num:s=>s.change_pct_diff_num??-Infinity,color:true}
+ {key:"change_pct_diff",label:"前日比率差",num:s=>s.change_pct_diff_num??-Infinity,color:true},
+ {key:"pct_streak",label:"前日比率連騰日数",num:s=>s.pct_streak??-Infinity}
 ];
 const VIEWS={default:{filter:null},up:{filter:s=>pnum(s.change_pct)>0},down:{filter:s=>pnum(s.change_pct)<0}};
 let view="default",all=[],allDates=[],sortKey="rank",sortAsc=true;
@@ -56,8 +58,8 @@ function setBanner(html,live){const b=document.getElementById("banner");b.innerH
 async function loadDate(d){const res=await fetch("data/"+d+".json",{cache:"no-cache"});const data=await res.json();all=data.rows;setBanner("保存データ: <b>"+(data.as_of?data.as_of+" 時点":d)+"</b> / 比較対象: <b>"+(data.prev_date||"なし(初回)")+"</b>",false);render()}
 function parseLive(html){const body=html.split('<div class="warning_contents">').slice(1).join('<div class="warning_contents">').split("</tbody>")[0];const rows=[];ROW_RE.lastIndex=0;let m;while((m=ROW_RE.exec(body))!==null){rows.push({industry:m.groups.industry.trim(),change_pct:m.groups.change_pct.trim()})}return rows}
 async function refreshLive(){const btn=document.getElementById("refreshBtn");btn.disabled=true;const orig=btn.textContent;try{const cb=Date.now();btn.textContent="取得中... 0/"+LIVE_PAGES;const htmls=[];for(let p=1;p<=LIVE_PAGES;p++){const res=await fetch(PROXY(TARGET_URL+"&page="+p+"&_cb="+cb),{cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);htmls.push(await res.text());btn.textContent="取得中... "+p+"/"+LIVE_PAGES}const html=htmls[0];let rows=htmls.flatMap(parseLive);const seen=new Set();rows=rows.filter(s=>!seen.has(s.industry)&&seen.add(s.industry));if(rows.length!==33)throw new Error("33業種を抽出できませんでした: "+rows.length);rows.forEach((s,i)=>s.rank=i+1);let dataDate=null,asOf=null;const am=html.match(AS_OF_RE);if(am){dataDate=am[1]+"-"+am[2]+"-"+am[3];asOf=dataDate+" "+am[4]}let baseDate=allDates.find(d=>!dataDate||d<dataDate)||null,base={};if(baseDate){const br=await fetch("data/"+baseDate+".json",{cache:"no-cache"});const bd=await br.json();base=Object.fromEntries(bd.rows.map(s=>[s.industry,{rank:s.rank,change_pct:s.change_pct}]))}for(const s of rows){const prev=base[s.industry];if(prev){const diff=prev.rank-s.rank;s.move=diff>0?"↑"+diff:diff<0?"↓"+(-diff):"→";s.prev_rank=prev.rank;s.move_num=diff;s.is_new=false;const delta=pnum(s.change_pct)-pnum(prev.change_pct);s.change_pct_diff_num=Math.round(delta*100)/100;s.change_pct_diff=delta?delta.toFixed(2).replace(/^/,delta>0?"+":"")+"%":"0.00%"}else{s.move=baseDate?"NEW":"";s.prev_rank="";s.move_num=null;s.is_new=!!baseDate;s.change_pct_diff_num=null;s.change_pct_diff=""}}all=rows;setBanner('<span class="live-dot"></span>ライブデータ: <b>'+(asOf?asOf+" 時点":"時刻不明")+'</b>(保存されません) / 比較対象: <b>'+(baseDate||"なし")+"</b>",true);render()}catch(e){setBanner('<span class="err">最新データの取得に失敗しました: '+e+"</span>",false)}finally{btn.disabled=false;btn.textContent=orig}}
-async function init(){const res=await fetch("data/index.json",{cache:"no-cache"});const idx=await res.json();allDates=idx.dates;const sel=document.getElementById("dateSel");sel.innerHTML=allDates.map(d=>'<option value="'+d+'">'+d+"</option>").join("");sel.onchange=()=>loadDate(sel.value);document.getElementById("q").oninput=render;document.getElementById("refreshBtn").onclick=refreshLive;document.getElementById("viewSel").onchange=e=>{view=e.target.value;render()};if(allDates.length)await loadDate(allDates[0]);else document.getElementById("body").innerHTML='<tr><td class="loading" colspan="6">データがありません</td></tr>'}
-init().catch(e=>{document.getElementById("body").innerHTML='<tr><td class="loading" colspan="6">読み込みエラー: '+e+"</td></tr>"});
+async function init(){const res=await fetch("data/index.json",{cache:"no-cache"});const idx=await res.json();allDates=idx.dates;const sel=document.getElementById("dateSel");sel.innerHTML=allDates.map(d=>'<option value="'+d+'">'+d+"</option>").join("");sel.onchange=()=>loadDate(sel.value);document.getElementById("q").oninput=render;document.getElementById("refreshBtn").onclick=refreshLive;document.getElementById("viewSel").onchange=e=>{view=e.target.value;render()};if(allDates.length)await loadDate(allDates[0]);else document.getElementById("body").innerHTML='<tr><td class="loading" colspan="8">データがありません</td></tr>'}
+init().catch(e=>{document.getElementById("body").innerHTML='<tr><td class="loading" colspan="8">読み込みエラー: '+e+"</td></tr>"});
 </script>
 </body>
 </html>

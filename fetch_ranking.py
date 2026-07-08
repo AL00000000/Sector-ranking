@@ -104,6 +104,34 @@ def add_comparisons(rows, today: str):
     return prev_date
 
 
+def add_streaks(rows, today: str):
+    # 連騰日数: 全履歴(当日含む)を日付昇順にたどり、順位/前日比率が前日比で
+    # 連続して改善している日数を数える(前日データが無い/欠落した時点で打ち切り)
+    prev_files = sorted(p for p in HISTORY.glob("*.json") if p.stem < today)
+    day_chain = []
+    for p in prev_files:
+        hist = json.loads(p.read_text(encoding="utf-8-sig"))
+        day_chain.append({h["industry"]: {"rank": h["rank"], "change_pct": parse_number(h["change_pct"])} for h in hist})
+    day_chain.append({s["industry"]: {"rank": s["rank"], "change_pct": parse_number(s["change_pct"])} for s in rows})
+
+    def streak(industry: str, key: str) -> int:
+        count = 0
+        for i in range(len(day_chain) - 1, 0, -1):
+            cur = day_chain[i].get(industry)
+            prv = day_chain[i - 1].get(industry)
+            if cur is None or prv is None:
+                break
+            up = (prv["rank"] - cur["rank"] > 0) if key == "rank" else (cur["change_pct"] - prv["change_pct"] > 0)
+            if not up:
+                break
+            count += 1
+        return count
+
+    for s in rows:
+        s["move_streak"] = streak(s["industry"], "rank")
+        s["pct_streak"] = streak(s["industry"], "change_pct")
+
+
 def main():
     today = date.today().isoformat()
     HISTORY.mkdir(exist_ok=True)
@@ -127,6 +155,7 @@ def main():
         s["rank"] = i
 
     prev_date = add_comparisons(rows, today)
+    add_streaks(rows, today)
 
     (HISTORY / f"{today}.json").write_text(
         json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -138,10 +167,11 @@ def main():
         json.dumps({"dates": dates}, ensure_ascii=False), encoding="utf-8")
 
     csv_path = OUTPUT / f"sector_ranking_{today}.csv"
-    header = ["順位", "順位変動", "前日順位", "業種名", "前日比率", "前日比率差"]
+    header = ["順位", "順位変動", "順位連騰日数", "前日順位", "業種名", "前日比率", "前日比率差", "前日比率連騰日数"]
     lines = [",".join(header)]
     for s in rows:
-        cells = [str(s["rank"]), s["move"], str(s["prev_rank"]), s["industry"], s["change_pct"], s["change_pct_diff"]]
+        cells = [str(s["rank"]), s["move"], str(s["move_streak"]), str(s["prev_rank"]), s["industry"],
+                 s["change_pct"], s["change_pct_diff"], str(s["pct_streak"])]
         lines.append(",".join('"' + c.replace('"', '""') + '"' for c in cells))
     csv_path.write_text("\n".join(lines), encoding="utf-8")
 
