@@ -61,6 +61,8 @@ async function refreshLive(){const btn=document.getElementById("refreshBtn");btn
 async function init(){const res=await fetch("data/index.json",{cache:"no-cache"});const idx=await res.json();allDates=idx.dates;const sel=document.getElementById("dateSel");sel.innerHTML=allDates.map(d=>'<option value="'+d+'">'+d+"</option>").join("");sel.onchange=()=>loadDate(sel.value);document.getElementById("q").oninput=render;document.getElementById("refreshBtn").onclick=refreshLive;document.getElementById("viewSel").onchange=e=>{view=e.target.value;render()};if(allDates.length)await loadDate(allDates[0]);else document.getElementById("body").innerHTML='<tr><td class="loading" colspan="8">データがありません</td></tr>'}
 init().catch(e=>{document.getElementById("body").innerHTML='<tr><td class="loading" colspan="8">読み込みエラー: '+e+"</td></tr>"});
 </script>
+<!-- 取得失敗日を日付プルダウンに赤く表示（共通部品: kabutan-ranking/docs/fetchstatus.js）-->
+<script src="/kabutan-ranking/fetchstatus.js" defer></script>
 </body>
 </html>
 
