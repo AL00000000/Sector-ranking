@@ -26,6 +26,14 @@ URL = "https://kabutan.jp/warning/?mode=9_1&market=0&capitalization=-1&stc=zenhi
 COOKIE = "shared_perpage=50"
 EXPECTED_COUNT = 33
 
+# 期間騰落率用。業種指数そのものの日足を株探から取る。
+# 行は1999年まであるが値が入っているのは直近約300営業日だけなので、遡れるのはそこまで。
+# 保存済みの日次ファイルは前日比%しか持たず取りこぼし日もあるので、
+# 積み上げて期間騰落率を作ると不正確になるため、指数の終値を別に持つ。
+BAR_URL = "https://kabutan.jp/stock/read?c={code}&m=1&k=1"
+BARS_FROM = "20240101"
+BENCH = [("0010", "TOPIX")]
+
 AS_OF_RE = re.compile(r'(\d{4})年(\d{2})月(\d{2})日</li>\s*<li>(\d{2}:\d{2})現在')
 
 def _cell(group: str) -> str:
@@ -70,8 +78,59 @@ def parse(html: str):
         rows.append({
             "industry": d["industry"],
             "change_pct": d["change_pct"],
+            "code": d["code"],
         })
     return rows
+
+
+def fetch_closes(code: str) -> dict:
+    """株探の日足を {YYYYMMDD: 終値} で返す。1行目2列目が0なら指数で、値は100で割る。"""
+    req = urllib.request.Request(BAR_URL.format(code=code), headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=30) as res:
+        lines = res.read().decode("utf-8", errors="replace").strip().splitlines()
+    div = 100 if lines[0].split(",")[1:2] == ["0"] else 10
+    out = {}
+    for line in lines[1:]:
+        f = line.split(",")
+        d = f[0].split("#")[0]           # 当日行は "20260916#15:22" の形
+        if len(f) < 5 or not f[4] or d < BARS_FROM:
+            continue
+        out[d] = int(f[4]) / div
+    return out
+
+
+def write_closes(rows) -> None:
+    """docs/data/closes.json = {dates, series:[{code, name, c:[...]}]}。
+    取れなかったときは前回のファイルを残す(ランキング本体の保存は止めない)。"""
+    targets = [(s["code"], s["industry"]) for s in rows] + BENCH
+    series, failed = [], []
+    for code, name in targets:
+        err = None
+        for attempt in range(3):           # 株探はたまに502を返すので数回やり直す
+            try:
+                series.append((code, name, fetch_closes(code)))
+                err = None
+                break
+            except Exception as e:  # noqa: BLE001
+                err = e
+                time.sleep(3 * (attempt + 1))
+        if err:
+            failed.append(f"{code}({err})")
+        time.sleep(0.8)
+    if failed or not series:
+        print(f"WARN: 業種指数の日足が取れず closes.json は更新しない: {', '.join(failed)}",
+              file=sys.stderr)
+        return
+    days = sorted(set().union(*(c.keys() for _, _, c in series)))
+    payload = {
+        "dates": [f"{d[:4]}-{d[4:6]}-{d[6:]}" for d in days],
+        "series": [{"code": code, "name": name, "c": [c.get(d) for d in days]}
+                   for code, name, c in series],
+    }
+    (DOCS_DATA / "closes.json").write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"closes.json: {len(series)}本 × {len(days)}日 ({payload['dates'][0]}〜{payload['dates'][-1]})",
+          file=sys.stderr)
 
 
 def add_comparisons(rows, today: str):
@@ -160,6 +219,8 @@ def main():
     if data_date != today:
         if (DOCS_DATA / f"{data_date}.json").is_file():
             print(f"skip: {data_date} は取得済み(実行日 {today} は休場日などの空振り)")
+            if not (DOCS_DATA / "closes.json").is_file():
+                write_closes(rows)
             return
         print(f"注意: 実行日 {today} に対しデータは {data_date} 付。"
               f"未取得の日なので {data_date} として保存する", file=sys.stderr)
@@ -167,6 +228,10 @@ def main():
 
     prev_date = add_comparisons(rows, today)
     add_streaks(rows, today)
+
+    write_closes(rows)
+    for s in rows:
+        s.pop("code", None)
 
     (HISTORY / f"{today}.json").write_text(
         json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
