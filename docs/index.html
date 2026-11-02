@@ -21,6 +21,11 @@
   <span><label>日付</label><select id="dateSel"></select></span>
   <span><label>騰落率の期間</label><select id="periodSel">
     <option value="0">前日比</option>
+    <option value="w1">1週間前から</option>
+    <option value="m1">1か月前から</option>
+    <option value="m3">3か月前から</option>
+    <option value="m6">6か月前から</option>
+    <option value="m12">1年前から</option>
     <option value="5">5営業日前から</option>
     <option value="10">10営業日前から</option>
     <option value="20">20営業日前から</option>
@@ -33,7 +38,7 @@
 </div>
 <div class="banner" id="banner">読み込み中...</div>
 <div class="banner" id="periodBanner" hidden></div>
-<div class="hint">列見出しクリックで並び替えできます。「変動」は前回保存日からの順位変動です。「連騰日数」は順位・前日比率それぞれ何日連続で改善しているか(2つは独立して列見出しクリックでソート可能)。<b>「騰落率の期間」</b>を変えると、「日付」で選んだ日の終値を終点に、N営業日前の終値からの<b>業種別株価指数そのものの騰落率</b>で並べ替えます。<b>「日付を指定」は、その日の値動きから含めます</b>(例: 9/1を指定すると8/31の終値が起点。9/1当日の上げ下げも入ります)。指定日が休場日なら次の営業日からです。「対TOPIX」は同じ期間のTOPIXの騰落率を引いた値。遡れるのは株探が持っている直近約300営業日までです。ライブ取得は表示のみで保存しません(ライブ取得時の連騰日数は、その時点の内容で当日が確定したと仮定した<b>暫定値</b>です。引けまでに順位や前日比率が動けば確定値は変わります)。</div>
+<div class="hint">列見出しクリックで並び替えできます。「変動」は前回保存日からの順位変動です。「連騰日数」は順位・前日比率それぞれ何日連続で改善しているか(2つは独立して列見出しクリックでソート可能)。<b>「騰落率の期間」</b>を変えると、「日付」で選んだ日の終値を終点に、N営業日前の終値からの<b>業種別株価指数そのものの騰落率</b>で並べ替えます。「1週間前」「1か月前」などは終点の日からカレンダーで遡り、その日が休場なら直前の営業日の終値を起点にします。<b>「日付を指定」は、その日の値動きから含めます</b>(例: 9/1を指定すると8/31の終値が起点。9/1当日の上げ下げも入ります)。指定日が休場日なら次の営業日からです。「対TOPIX」は同じ期間のTOPIXの騰落率を引いた値。遡れるのは株探が持っている直近約300営業日までです。ライブ取得は表示のみで保存しません(ライブ取得時の連騰日数は、その時点の内容で当日が確定したと仮定した<b>暫定値</b>です。引けまでに順位や前日比率が動けば確定値は変わります)。</div>
 <div class="tablecard"><table><thead><tr id="headRow"></tr></thead><tbody id="body"><tr><td class="loading" colspan="7">読み込み中...</td></tr></tbody></table></div>
 <footer>データ取得元: <a href="https://kabutan.jp/warning/?mode=9_1&market=0&capitalization=-1&stc=zenhiritsu&stm=1&col=zenhiritsu" target="_blank" rel="noopener">株探 東証【業種別】騰落ランキング</a> / 本サイトのデータの正確性は保証されません。</footer>
 </div>
@@ -86,6 +91,21 @@ async function loadCloses(){
  fd.min=j.dates[1];fd.max=j.dates[j.dates.length-1];
  return closes;
 }
+/* 「1週間前」「1か月前」などの起点。カレンダーで遡り、休場ならその前の営業日(期間騰落率タブの列と同じ決め方) */
+const CAL_LABEL={w1:"1週間前",m1:"1か月前",m3:"3か月前",m6:"6か月前",m12:"1年前"};
+function calStartIdx(dates,ei,key){
+ const [y,m,d]=dates[ei].split("-").map(Number);
+ let dt;
+ if(key==="w1")dt=new Date(Date.UTC(y,m-1,d-7));
+ else{
+  // 月末の繰り上がりを防ぐ(3/31の1か月前は2/28)
+  const n=parseInt(key.slice(1),10),last=new Date(Date.UTC(y,m-n,0)).getUTCDate();
+  dt=new Date(Date.UTC(y,m-1-n,Math.min(d,last)));
+ }
+ const ymd=dt.toISOString().slice(0,10);
+ for(let i=ei;i>=0;i--)if(dates[i]<=ymd)return i;
+ return -1;
+}
 /* いまの「日付」(またはライブ)を終点に、期間騰落率を各行へ書き込む。
    日付軸は株探の業種指数の営業日なので、保存ファイルの取りこぼし日に影響されない。
    ライブで当日の終値がまだ無いときは、ライブの指数値を当日の値として軸の末尾に足す。 */
@@ -107,6 +127,9 @@ function applyPeriod(){
   if(fi<0||fi>ei){periodInfo='<span class="err">'+f+' は終点の日('+dates[ei]+')より後です</span>';return}
   if(fi===0){periodInfo='<span class="err">'+f+' の前営業日の指数データがありません(指定できるのは'+dates[1]+'以降)</span>';return}
   si=fi-1;
+ }else if(CAL_LABEL[period]){
+  si=calStartIdx(dates,ei,period);
+  if(si<0){periodInfo='<span class="err">'+dates[ei]+' の'+CAL_LABEL[period]+'の指数データがありません(遡れるのは'+dates[0]+'まで)</span>';return}
  }else{
   si=ei-parseInt(period,10);
   if(si<0){periodInfo='<span class="err">'+period+'営業日前の指数データがありません(遡れるのは'+dates[0]+'まで)</span>';return}
