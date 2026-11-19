@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>東証 業種別騰落ランキング</title>
 <style>
-:root{--bg:#0b1020;--panel:#111a2e;--panel2:#0d1424;--border:#22314f;--text:#e5edf8;--muted:#8795ae;--accent:#40c6d0;--up:#ff6575;--down:#58a6ff;--new:#ffd166}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:"Segoe UI","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;min-height:100vh}.wrap{max-width:980px;margin:0 auto;padding:24px 16px 64px}header.site{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px 18px;padding:8px 4px 20px}h1{font-size:1.45rem}.dot{color:var(--accent)}.sub{color:var(--muted);font-size:.86rem}.srcbtn{margin-left:auto;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:7px 14px;font-size:.82rem}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}label{color:var(--muted);font-size:.82rem;margin-right:6px}select,input{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.9rem}input{width:220px}button.refresh{background:linear-gradient(135deg,#1d8f98,#40c6d0);color:#03141b;font-weight:700;border:0;border-radius:8px;padding:9px 16px;cursor:pointer}button.refresh:disabled{opacity:.55;cursor:wait}.stat{color:var(--muted);font-size:.82rem}.stat b{color:var(--text)}.banner{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--panel2);padding:9px 14px;margin-bottom:10px;font-size:.84rem;color:var(--muted)}.banner b{color:var(--text)}.banner.is-live{border-color:#1d8f98}.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:7px;box-shadow:0 0 6px var(--accent)}.err{color:var(--up)}.hint{color:var(--muted);font-size:.78rem;line-height:1.7;padding:0 4px 10px}.tablecard{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:78vh}table{border-collapse:collapse;width:100%;font-size:.92rem;white-space:nowrap}thead th{position:sticky;top:0;background:#16223f;color:var(--muted);font-weight:600;font-size:.8rem;padding:10px;text-align:right;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}thead th.tl{text-align:left}tbody td{padding:8px 10px;text-align:right;border-bottom:1px solid #17223b;font-variant-numeric:tabular-nums}tbody td.tl{text-align:left}tbody tr:hover{background:#16223f66}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}.new{color:var(--new);font-weight:700}.industry{font-weight:600}.loading{padding:42px;text-align:center;color:var(--muted)}footer{margin-top:18px;color:var(--muted);font-size:.76rem;line-height:1.7;padding:0 4px}footer a{color:var(--accent)}#fromDate{width:auto}.pnote{color:var(--muted);font-size:.78rem}@media(max-width:720px){input{width:100%}table{font-size:.75rem}thead th,tbody td{padding:7px 5px}.srcbtn{margin-left:0}}
+:root{--bg:#0b1020;--panel:#111a2e;--panel2:#0d1424;--border:#22314f;--text:#e5edf8;--muted:#8795ae;--accent:#40c6d0;--up:#ff6575;--down:#58a6ff;--new:#ffd166}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:"Segoe UI","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;min-height:100vh}.wrap{max-width:980px;margin:0 auto;padding:24px 16px 64px}header.site{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px 18px;padding:8px 4px 20px}h1{font-size:1.45rem}.dot{color:var(--accent)}.sub{color:var(--muted);font-size:.86rem}.srcbtn{margin-left:auto;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:8px;background:var(--panel2);padding:7px 14px;font-size:.82rem}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}label{color:var(--muted);font-size:.82rem;margin-right:6px}select,input{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.9rem}input{width:220px}button.refresh{background:linear-gradient(135deg,#1d8f98,#40c6d0);color:#03141b;font-weight:700;border:0;border-radius:8px;padding:9px 16px;cursor:pointer}button.refresh:disabled{opacity:.55;cursor:wait}.stat{color:var(--muted);font-size:.82rem}.stat b{color:var(--text)}.banner{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;border:1px solid var(--border);border-radius:10px;background:var(--panel2);padding:9px 14px;margin-bottom:10px;font-size:.84rem;color:var(--muted)}.banner b{color:var(--text)}.banner.is-live{border-color:#1d8f98}.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:7px;box-shadow:0 0 6px var(--accent)}.err{color:var(--up)}.hint{color:var(--muted);font-size:.78rem;line-height:1.7;padding:0 4px 10px}.tablecard{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:78vh}table{border-collapse:collapse;width:100%;font-size:.92rem;white-space:nowrap}thead th{position:sticky;top:0;background:#16223f;color:var(--muted);font-weight:600;font-size:.8rem;padding:10px;text-align:right;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}thead th.tl{text-align:left}tbody td{padding:8px 10px;text-align:right;border-bottom:1px solid #17223b;font-variant-numeric:tabular-nums}tbody td.tl{text-align:left}tbody tr:hover{background:#16223f66}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}.new{color:var(--new);font-weight:700}.industry{font-weight:600}.loading{padding:42px;text-align:center;color:var(--muted)}footer{margin-top:18px;color:var(--muted);font-size:.76rem;line-height:1.7;padding:0 4px}footer a{color:var(--accent)}#fromDate{width:auto}.pnote{color:var(--muted);font-size:.78rem}.vtabs{display:flex;gap:6px;margin:0 0 10px}.vtabs button{background:var(--panel2);color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:.9rem;cursor:pointer}.vtabs button.on{color:#03141b;background:var(--accent);border-color:var(--accent);font-weight:700}.wrap.wide{max-width:1500px}.chk{display:inline-flex;align-items:center;gap:6px;color:var(--text);font-size:.85rem;margin:0;cursor:pointer}.chk input{width:auto;padding:0}.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}.chcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:9px 10px 6px;min-width:0}.chcard.bench{border-color:#1d8f98}.chhead{display:flex;align-items:baseline;gap:8px}.chrank{color:var(--muted);font-size:.74rem;min-width:2.4em}.chname{color:var(--text);font-weight:700;text-decoration:none}.chname:hover{color:var(--accent)}.chret{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums}.chsub{color:var(--muted);font-size:.72rem;height:1.5em;line-height:1.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}.chcard svg{display:block;width:100%;height:auto;touch-action:pan-y}.chfoot{display:flex;justify-content:space-between;color:var(--muted);font-size:.66rem}.cu{fill:var(--up)}.cd{fill:var(--down)}.wu{stroke:var(--up)}.wd{stroke:var(--down)}.ma25{stroke:#ffd166;fill:none;stroke-width:1.1}.ma75{stroke:#c39bff;fill:none;stroke-width:1.1}.tpxl{stroke:#9aa7bd;fill:none;stroke-width:1;stroke-dasharray:3 2}.basel{stroke:#4a5d84;stroke-dasharray:2 3}.gl{stroke:#1a2742}.ax{fill:var(--muted);font-size:9px}.xh{stroke:#8795ae;stroke-width:.8}.lg{display:inline-block;width:14px;height:0;border-top:2px solid;vertical-align:middle;margin:0 3px 0 8px}@media(max-width:720px){input{width:100%}table{font-size:.75rem}thead th,tbody td{padding:7px 5px}.srcbtn{margin-left:0}}
 </style>
 </head>
 <body>
@@ -15,6 +15,8 @@
   <span class="sub">株探 / 前日比率降順 / 平日15:50取得</span>
   <a class="srcbtn" href="https://github.com/AL00000000/Sector-ranking/archive/refs/heads/main.zip">ソースコード</a>
 </header>
+<nav class="vtabs"><button type="button" data-v="rank" class="on">ランキング</button><button type="button" data-v="chart">セクターチャート</button></nav>
+<div id="viewRank">
 <div class="toolbar">
   <button class="refresh" id="refreshBtn">最新データを取得</button>
   <span><label>データ群</label><select id="viewSel"><option value="default">全業種</option><option value="up">上昇業種のみ</option><option value="down">下落業種のみ</option></select></span>
@@ -40,6 +42,19 @@
 <div class="banner" id="periodBanner" hidden></div>
 <div class="hint">列見出しクリックで並び替えできます。「変動」は前回保存日からの順位変動です。「連騰日数」は順位・前日比率それぞれ何日連続で改善しているか(2つは独立して列見出しクリックでソート可能)。<b>「騰落率の期間」</b>を変えると、「日付」で選んだ日の終値を終点に、N営業日前の終値からの<b>業種別株価指数そのものの騰落率</b>で並べ替えます。「1週間前」「1か月前」などは終点の日からカレンダーで遡り、その日が休場なら直前の営業日の終値を起点にします。<b>「日付を指定」は、その日の値動きから含めます</b>(例: 9/1を指定すると8/31の終値が起点。9/1当日の上げ下げも入ります)。指定日が休場日なら次の営業日からです。「対TOPIX」は同じ期間のTOPIXの騰落率を引いた値。遡れるのは株探が持っている直近約300営業日までです。ライブ取得は表示のみで保存しません(ライブ取得時の連騰日数は、その時点の内容で当日が確定したと仮定した<b>暫定値</b>です。引けまでに順位や前日比率が動けば確定値は変わります)。</div>
 <div class="tablecard"><table><thead><tr id="headRow"></tr></thead><tbody id="body"><tr><td class="loading" colspan="7">読み込み中...</td></tr></tbody></table></div>
+</div>
+<div id="viewChart" hidden>
+<div class="toolbar">
+  <span><label>期間</label><select id="chPeriod"><option value="1">1か月</option><option value="3">3か月</option><option value="6" selected>6か月</option><option value="12">1年</option></select></span>
+  <span><label>並び順</label><select id="chSort"><option value="ret">期間騰落率が高い順</option><option value="retAsc">期間騰落率が低い順</option><option value="code">業種コード順</option></select></span>
+  <label class="chk"><input type="checkbox" id="chMa" checked>移動平均(25日・75日)</label>
+  <label class="chk"><input type="checkbox" id="chTpx">TOPIXを重ねる</label>
+  <span class="stat" id="chStat"></span>
+</div>
+<div class="hint">東証33業種の業種別株価指数の日足です。株探の日足データ(始値・高値・安値・終値)から、このページで描いています。左上は期間騰落率の順位、右上は期間騰落率(起点の終値から最新の終値まで)です。起点は「騰落率の期間」の「6か月前から」などと同じ決め方です。業種名をクリックすると株探のチャートページが開きます。チャートにマウスを乗せる(スマホはなぞる)と、その日の四本値と前日比が出ます。<br>
+<span class="lg" style="border-color:var(--up)"></span>陽線 <span class="lg" style="border-color:var(--down)"></span>陰線 <span class="lg" style="border-color:#ffd166"></span>25日線 <span class="lg" style="border-color:#c39bff"></span>75日線 <span class="lg" style="border-color:#9aa7bd;border-top-style:dashed"></span>TOPIX(起点の値をそろえて重ねたもの) <span class="lg" style="border-color:#4a5d84;border-top-style:dotted"></span>起点の終値</div>
+<div class="chgrid" id="chGrid"><div class="loading">読み込み中...</div></div>
+</div>
 <footer>データ取得元: <a href="https://kabutan.jp/warning/?mode=9_1&market=0&capitalization=-1&stc=zenhiritsu&stm=1&col=zenhiritsu" target="_blank" rel="noopener">株探 東証【業種別】騰落ランキング</a> / 本サイトのデータの正確性は保証されません。</footer>
 </div>
 <script>
@@ -195,6 +210,117 @@ async function init(){const res=await fetch("data/index.json",{cache:"no-cache"}
   await refreshPeriod();
  };
  document.getElementById("fromDate").onchange=refreshPeriod;if(allDates.length)await loadDate(allDates[0]);else document.getElementById("body").innerHTML='<tr><td class="loading" colspan="7">データがありません</td></tr>'}
+/* ===== セクターチャート。株探の業種指数の日足(docs/data/ohlc.json)をこのページで描く ===== */
+const VIEW_KEY="sectorRanking.view",CHP_KEY="sectorRanking.chartPeriod";
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(_){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}};
+let ohlc=null;
+async function loadOhlc(){
+ if(ohlc)return ohlc;
+ const r=await fetch("data/ohlc.json",{cache:"no-cache"});
+ if(!r.ok)throw new Error("ohlc.json "+r.status);
+ return ohlc=await r.json();
+}
+function showView(v){
+ document.getElementById("viewRank").hidden=v!=="rank";
+ document.getElementById("viewChart").hidden=v!=="chart";
+ document.querySelector(".wrap").classList.toggle("wide",v==="chart");
+ for(const b of document.querySelectorAll(".vtabs button"))b.classList.toggle("on",b.dataset.v===v);
+ lsSet(VIEW_KEY,v);
+ if(v==="chart")renderCharts();
+}
+function sma(c,n){
+ const out=new Array(c.length).fill(null);
+ for(let i=n-1;i<c.length;i++){let s=0,ok=true;for(let j=i-n+1;j<=i;j++){if(c[j]==null){ok=false;break}s+=c[j]}if(ok)out[i]=s/n}
+ return out;
+}
+const fmtV=v=>v.toLocaleString("ja-JP",{minimumFractionDigits:2,maximumFractionDigits:2});
+const CW=320,CH=170,PL=2,PR=CW-40,PT=6,PB=CH-6;
+/* 1枚分のSVG。tpxは起点の値をそろえたTOPIX(重ねないときはnull) */
+function chartSvg(s,si,ei,ma,tpx){
+ const n=ei-si+1,step=(PR-PL)/n,bw=Math.max(.8,step*.62);
+ let hi=-Infinity,lo=Infinity;
+ const take=v=>{if(v!=null){if(v>hi)hi=v;if(v<lo)lo=v}};
+ for(let i=si;i<=ei;i++){take(s.h[i]);take(s.l[i]);if(ma){take(ma[0][i]);take(ma[1][i])}if(tpx)take(tpx[i])}
+ const pad=(hi-lo)*.04||1;hi+=pad;lo-=pad;
+ const y=v=>PT+(hi-v)/(hi-lo)*(PB-PT),x=i=>PL+(i-si+.5)*step,r=v=>v.toFixed(1);
+ let bu="",bd="",wu="",wd="";
+ for(let i=si;i<=ei;i++){
+  const o=s.o[i],c=s.c[i];if(c==null)continue;
+  const up=c>=o,cx=x(i),top=y(Math.max(o,c)),h=Math.max(.6,y(Math.min(o,c))-top);
+  const body="M"+r(cx-bw/2)+" "+r(top)+"h"+r(bw)+"v"+r(h)+"h"+r(-bw)+"Z";
+  const wick="M"+r(cx)+" "+r(y(s.h[i]))+"V"+r(y(s.l[i]));
+  if(up){bu+=body;wu+=wick}else{bd+=body;wd+=wick}
+ }
+ const line=a=>{let d="";for(let i=si;i<=ei;i++)if(a[i]!=null)d+=(i>si&&a[i-1]!=null&&d?"L":"M")+r(x(i))+" "+r(y(a[i]));return d};
+ const dec=hi>=1000?0:1;
+ let grid="";
+ for(const k of [0,.5,1]){const v=lo+pad+(hi-lo-2*pad)*k,yy=y(v);grid+='<line class="gl" x1="'+PL+'" x2="'+PR+'" y1="'+r(yy)+'" y2="'+r(yy)+'"/><text class="ax" x="'+(PR+3)+'" y="'+r(yy+3)+'">'+v.toLocaleString("ja-JP",{maximumFractionDigits:dec,minimumFractionDigits:dec})+"</text>"}
+ const by=r(y(s.c[si]));
+ return '<svg viewBox="0 0 '+CW+" "+CH+'">'+grid
+  +'<line class="basel" x1="'+PL+'" x2="'+PR+'" y1="'+by+'" y2="'+by+'"/>'
+  +(tpx?'<path class="tpxl" d="'+line(tpx)+'"/>':"")
+  +'<path class="wu" d="'+wu+'"/><path class="wd" d="'+wd+'"/><path class="cu" d="'+bu+'"/><path class="cd" d="'+bd+'"/>'
+  +(ma?'<path class="ma75" d="'+line(ma[1])+'"/><path class="ma25" d="'+line(ma[0])+'"/>':"")
+  +'<line class="xh" y1="'+PT+'" y2="'+PB+'" x1="0" x2="0" visibility="hidden"/></svg>';
+}
+async function renderCharts(){
+ const grid=document.getElementById("chGrid"),stat=document.getElementById("chStat");
+ let d;
+ try{d=await loadOhlc()}catch(e){grid.innerHTML='<div class="loading err">チャートデータの読み込みに失敗: '+e+"</div>";return}
+ const months=document.getElementById("chPeriod").value;
+ const useMa=document.getElementById("chMa").checked,useTpx=document.getElementById("chTpx").checked;
+ const dates=d.dates,ei=dates.length-1;
+ let si=calStartIdx(dates,ei,"m"+months),short=false;
+ if(si<0){si=0;short=true}
+ const ret=s=>s.c[si]&&s.c[ei]?s.c[ei]/s.c[si]-1:null;
+ const T=d.series.find(s=>s.code==="0010");
+ const tr=T?ret(T):null;
+ const secs=d.series.filter(s=>s!==T).map(s=>({s,ret:ret(s)}));
+ [...secs].sort((a,b)=>(b.ret??-Infinity)-(a.ret??-Infinity)).forEach((x,i)=>{x.rank=i+1});
+ const sort=document.getElementById("chSort").value;
+ if(sort==="code")secs.sort((a,b)=>a.s.code.localeCompare(b.s.code));
+ else secs.sort((a,b)=>sort==="ret"?a.rank-b.rank:b.rank-a.rank);
+ const items=(T?[{s:T,ret:tr,bench:true}]:[]).concat(secs);
+ stat.innerHTML="期間: <b>"+dates[si]+"</b> の終値 → <b>"+dates[ei]+"</b> の終値（"+(ei-si)+"営業日）"
+  +(short?' <span class="err">データは'+dates[0]+"からなので、そこを起点にしています</span>":"");
+ const tpxBase=T&&T.c[si];
+ grid.innerHTML=items.map((x,k)=>{
+  const s=x.s,ma=useMa?[sma(s.c,25),sma(s.c,75)]:null;
+  const tpx=useTpx&&!x.bench&&tpxBase?T.c.map(v=>v==null?null:v/tpxBase*s.c[si]):null;
+  x.sub="終値 "+fmtV(s.c[ei])+(x.bench||tr==null||x.ret==null?"":" ・ 対TOPIX "+fmtPct((x.ret-tr)*100).replace("%","pt"));
+  const rc=x.ret==null?"":x.ret>0?"up":x.ret<0?"down":"flat";
+  return '<div class="chcard'+(x.bench?" bench":"")+'" data-k="'+k+'"><div class="chhead"><span class="chrank">'+(x.bench?"基準":x.rank+"位")+"</span>"
+   +'<a class="chname" href="https://kabutan.jp/stock/chart?code='+s.code+'" target="_blank" rel="noopener">'+s.name+" ↗</a>"
+   +'<span class="chret '+rc+'">'+(x.ret==null?"-":fmtPct(x.ret*100))+"</span></div>"
+   +'<div class="chsub">'+x.sub+"</div>"+chartSvg(s,si,ei,ma,tpx)
+   +'<div class="chfoot"><span>'+dates[si]+"</span><span>"+dates[ei]+"</span></div></div>";
+ }).join("");
+ // マウス(指)の位置の日の四本値を、見出し下の行に出す
+ for(const card of grid.querySelectorAll(".chcard")){
+  const x=items[+card.dataset.k],s=x.s,svg=card.querySelector("svg"),xh=svg.querySelector(".xh"),sub=card.querySelector(".chsub");
+  const n=ei-si+1,step=(PR-PL)/n;
+  const move=e=>{
+   const p=e.touches?e.touches[0]:e,rc=svg.getBoundingClientRect();
+   const i=si+Math.min(n-1,Math.max(0,Math.floor(((p.clientX-rc.left)/rc.width*CW-PL)/step)));
+   const xx=(PL+(i-si+.5)*step).toFixed(1);
+   xh.setAttribute("x1",xx);xh.setAttribute("x2",xx);xh.setAttribute("visibility","visible");
+   const pc=i>0&&s.c[i-1]?fmtPct((s.c[i]/s.c[i-1]-1)*100):"-";
+   sub.textContent=dates[i]+"  始"+fmtV(s.o[i])+" 高"+fmtV(s.h[i])+" 安"+fmtV(s.l[i])+" 終"+fmtV(s.c[i])+"（"+pc+"）";
+  };
+  const leave=()=>{xh.setAttribute("visibility","hidden");sub.innerHTML=x.sub};
+  svg.addEventListener("mousemove",move);svg.addEventListener("mouseleave",leave);
+  svg.addEventListener("touchmove",move,{passive:true});svg.addEventListener("touchend",leave);
+ }
+}
+for(const b of document.querySelectorAll(".vtabs button"))b.onclick=()=>showView(b.dataset.v);
+{
+ const p=lsGet(CHP_KEY);
+ if(p&&document.querySelector('#chPeriod option[value="'+p+'"]'))document.getElementById("chPeriod").value=p;
+}
+document.getElementById("chPeriod").onchange=e=>{lsSet(CHP_KEY,e.target.value);renderCharts()};
+for(const id of ["chSort","chMa","chTpx"])document.getElementById(id).onchange=renderCharts;
+if(location.hash==="#chart"||lsGet(VIEW_KEY)==="chart")showView("chart");
 init().catch(e=>{document.getElementById("body").innerHTML='<tr><td class="loading" colspan="7">読み込みエラー: '+e+"</td></tr>"});
 </script>
 <!-- 取得失敗日を日付プルダウンに赤く表示（共通部品: kabutan-ranking/docs/fetchstatus.js）-->

@@ -9,6 +9,8 @@
 - `history/` … 比較用の生データ JSON
 - `output/` … 日次 CSV (`sector_ranking_YYYY-MM-DD.csv`, UTF-8)
 - `docs/data/` … GitHub Pages が読み込む JSON
+  - `closes.json` … 33業種+TOPIXの指数終値(期間騰落率用)
+  - `ohlc.json` … 同じく四本値(「セクターチャート」表示用。株探の日足から自前で描く)
 
 ## 取得
 

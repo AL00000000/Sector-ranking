@@ -83,8 +83,9 @@ def parse(html: str):
     return rows
 
 
-def fetch_closes(code: str) -> dict:
-    """株探の日足を {YYYYMMDD: 終値} で返す。1行目2列目が0なら指数で、値は100で割る。"""
+def fetch_bars(code: str) -> dict:
+    """株探の日足を {YYYYMMDD: (始値, 高値, 安値, 終値)} で返す。1行目2列目が0なら指数で、値は100で割る。
+    始値〜安値が空の行は終値で埋める(チャートで足が消えないように)。"""
     req = urllib.request.Request(BAR_URL.format(code=code), headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=30) as res:
         lines = res.read().decode("utf-8", errors="replace").strip().splitlines()
@@ -95,12 +96,15 @@ def fetch_closes(code: str) -> dict:
         d = f[0].split("#")[0]           # 当日行は "20260916#15:22" の形
         if len(f) < 5 or not f[4] or d < BARS_FROM:
             continue
-        out[d] = int(f[4]) / div
+        c = int(f[4]) / div
+        o, h, l = (int(x) / div if x else c for x in f[1:4])
+        out[d] = (o, h, l, c)
     return out
 
 
 def write_closes(rows) -> None:
-    """docs/data/closes.json = {dates, series:[{code, name, c:[...]}]}。
+    """docs/data/closes.json = {dates, series:[{code, name, c:[...]}]}(期間騰落率用)と
+    docs/data/ohlc.json = {dates, series:[{code, name, o, h, l, c}]}(セクターチャート用)。
     取れなかったときは前回のファイルを残す(ランキング本体の保存は止めない)。"""
     targets = [(s["code"], s["industry"]) for s in rows] + BENCH
     series, failed = [], []
@@ -108,7 +112,7 @@ def write_closes(rows) -> None:
         err = None
         for attempt in range(3):           # 株探はたまに502を返すので数回やり直す
             try:
-                series.append((code, name, fetch_closes(code)))
+                series.append((code, name, fetch_bars(code)))
                 err = None
                 break
             except Exception as e:  # noqa: BLE001
@@ -124,11 +128,19 @@ def write_closes(rows) -> None:
     days = sorted(set().union(*(c.keys() for _, _, c in series)))
     payload = {
         "dates": [f"{d[:4]}-{d[4:6]}-{d[6:]}" for d in days],
-        "series": [{"code": code, "name": name, "c": [c.get(d) for d in days]}
-                   for code, name, c in series],
+        "series": [{"code": code, "name": name, "c": [b[d][3] if d in b else None for d in days]}
+                   for code, name, b in series],
     }
     (DOCS_DATA / "closes.json").write_text(
         json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    ohlc = {
+        "dates": payload["dates"],
+        "series": [{"code": code, "name": name,
+                    **{k: [b[d][i] if d in b else None for d in days] for i, k in enumerate("ohlc")}}
+                   for code, name, b in series],
+    }
+    (DOCS_DATA / "ohlc.json").write_text(
+        json.dumps(ohlc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"closes.json: {len(series)}本 × {len(days)}日 ({payload['dates'][0]}〜{payload['dates'][-1]})",
           file=sys.stderr)
 
